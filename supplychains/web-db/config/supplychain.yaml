@@ -112,3 +112,10 @@ spec:
       value: #@ data.values.helm.version
     - name: helmValues
       value: #@ data.values.helm.values
+  - name: database-config
+    templateRef:
+      kind: ClusterTemplate
+      name: simple-database-helm-values
+    params:
+    - name: helmValues
+      value: #@ data.values.helm.values

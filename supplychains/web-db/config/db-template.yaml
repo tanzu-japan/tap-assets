@@ -8,26 +8,25 @@ spec:
     - name: serviceAccount
       default: default
     - name: helmUrl
-      default: ""
+      default: https://charts.app-catalog.vmware.com/demo
     - name: helmName
-      default: ""
+      default: mysql
     - name: helmVersion
-      default: ""
-    - name: helmValues 
-      default: ""
+      default: 8.8.17
   ytt: |
     #@ load("@ytt:data", "data")
     #@ load("@ytt:yaml", "yaml")
-
+    ---
     apiVersion: kappctrl.k14s.io/v1alpha1
     kind: App
     metadata:
       name: #@ data.values.workload.metadata.name + "-db"
     spec:
       syncPeriod: 10m
-     
+      serviceAccountName: #@ data.values.params.serviceAccount 
+
       fetch:
-      - helm:
+      - helmChart:
           name: #@ data.values.params.helmName
           version: #@ data.values.params.helmVersion
           repository:
@@ -36,7 +35,7 @@ spec:
       - helmTemplate:
           valuesFrom:
           - configMapRef:
-              name: db-helm-values
+              name: #@ data.values.workload.metadata.name + "-helm-values"
       - ytt: {}
       - kbld: {}
       deploy:

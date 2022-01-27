@@ -1,0 +1,19 @@
+---
+apiVersion: carto.run/v1alpha1
+kind: ClusterTemplate
+metadata:
+  name: simple-database-helm-values
+spec:
+  params:
+    - name: helmValues
+      default: ""
+  ytt: |
+    #@ load("@ytt:data", "data")
+    #@ load("@ytt:yaml", "yaml")
+    ---
+    apiVersion: v1
+    data:
+      db-helm-values.yaml: #@ yaml.encode(data.values.params.helmValues)
+    kind: ConfigMap
+    metadata:
+      name: #@ data.values.workload.metadata.name + "-helm-values"
