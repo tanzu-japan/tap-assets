@@ -1,0 +1,51 @@
+---
+apiVersion: carto.run/v1alpha1
+kind: ClusterTemplate
+metadata:
+  name: simple-database
+spec:
+  params:
+    - name: serviceAccount
+      default: default
+    - name: helmUrl
+      default: ""
+    - name: helmName
+      default: ""
+    - name: helmVersion
+      default: ""
+    - name: helmValues 
+      default: ""
+  ytt: |
+    #@ load("@ytt:data", "data")
+    #@ load("@ytt:yaml", "yaml")
+
+    apiVersion: kappctrl.k14s.io/v1alpha1
+    kind: App
+    metadata:
+      name: #@ data.values.workload.metadata.name + "-db"
+    spec:
+      syncPeriod: 10m
+     
+      fetch:
+      - helm:
+          name: #@ data.values.params.helmName
+          version: #@ data.values.params.helmVersion
+          repository:
+            url: #@ data.values.params.helmUrl
+      template:
+      - helmTemplate:
+          valuesFrom:
+          - configMapRef:
+              name: db-helm-values
+      - ytt: {}
+      - kbld: {}
+      deploy:
+      - kapp: {}
+    ---
+    apiVersion: v1
+    data:
+      db-helm-values.yaml: #@ yaml.encode(data.values.params.helmValues)
+    kind: ConfigMap
+    metadata:
+      name: #@ data.values.workload.metadata.name + "-helm-values"
+    

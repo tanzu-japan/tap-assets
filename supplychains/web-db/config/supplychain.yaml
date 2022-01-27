@@ -97,3 +97,18 @@ spec:
     configs:
       - resource: app-config
         name: config
+  - name: database
+    templateRef:
+      kind: ClusterTemplate
+      name: simple-database
+    params:
+    - name: serviceAccount
+      value: #@ data.values.service_account
+    - name: helmUrl
+      value: #@ data.values.helm.url
+    - name: helmName
+      value: #@ data.values.helm.name
+    - name: helmVersion
+      value: #@ data.values.helm.version
+    - name: helmValues
+      value: #@ data.values.helm.values
