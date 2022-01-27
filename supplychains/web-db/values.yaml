@@ -1,0 +1,22 @@
+#@data/values
+---
+registry:
+  server: 
+  repository: 
+
+gitops:
+  repository_prefix:
+  branch: main
+  user_name: supplychain
+  user_email: supplychain
+  commit_message: supplychain@cluster.local
+  ssh_secret: ""
+
+cluster_builder: default
+service_account: default
+
+helm:
+  url: https://charts.app-catalog.vmware.com/demo
+  name: mysql
+  version: 8.8.17
+  values: ""

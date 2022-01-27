@@ -1,0 +1,46 @@
+#@ load("@ytt:data", "data")
+
+---
+apiVersion: carto.run/v1alpha1
+kind: ClusterDelivery
+metadata:
+  name: delivery-basic-w-db
+spec:
+  selector:
+    app.tanzu.vmware.com/deliverable-type: web-db
+
+  resources:
+  - name: source-provider
+    templateRef:
+      kind: ClusterSourceTemplate
+      name: delivery-source-template
+    params:
+    - name: serviceAccount
+      value: #@ data.values.service_account
+
+  - name: database-deployer
+    templateRef:
+      kind: ClusterDeploymentTemplate
+      name: simple-database
+    params:
+    - name: serviceAccount
+      value: #@ data.values.service_account
+    - name: helmUrl
+      value: #@ data.values.helm.url
+    - name: helmName
+      value: #@ data.values.helm.name
+    - name: helmVersion
+      value: #@ data.values.helm.version
+    - name: helmValues
+      value: #@ data.values.helm.values
+    deployment:
+      resource: source-provider
+  - name: deployer
+    templateRef:
+      kind: ClusterDeploymentTemplate
+      name: app-deploy
+    params:
+      - name: serviceAccount
+        value: #@ data.values.service_account
+    deployment:
+      resource: source-provider

@@ -1,0 +1,57 @@
+---
+apiVersion: carto.run/v1alpha1
+kind: ClusterDeploymentTemplate
+metadata:
+  name: simple-database
+spec:
+  params:
+    - name: serviceAccount
+      default: default
+    - name: helmUrl
+      default: ""
+    - name: helmName
+      default: ""
+    - name: helmVersion
+      default: ""
+    - name: helmValues 
+      default: ""
+  observedCompletion:
+    succeeded:
+      key: '.status.conditions[?(@.type=="ReconcileSucceeded")].status'
+      value: 'True'
+    failed:
+      key: '.status.conditions[?(@.type=="ReconcileSucceeded")].status'
+      value: 'False'
+
+  ytt: |
+    #@ load("@ytt:data", "data")
+    #@ load("@ytt:yaml", "yaml")
+
+    apiVersion: kappctrl.k14s.io/v1alpha1
+    kind: App
+    metadata:
+      name: #@ data.values.deliverable.metadata.name + "-db"
+    spec:
+      syncPeriod: 10m
+     
+      fetch:
+        - helm:
+            name: #@ data.values.param.helmName
+            version: #@ data.values.param.helmVersion
+            repository:
+              url: #@ data.values.param.helmUrl
+      template:
+        - helmTemplate:
+            valuesFrom:
+              - configMapRef:
+                  name: db-helm-values
+      template:
+        - ytt: {}
+        - kbld: {}
+      deploy:
+        - kapp: {}
+    ---
+    ApiVersion: v1
+    Data:
+      db-helm-values.yaml: #@ yaml.encode(data.values.param.helmValues)
+    Kind: ConfigMap
