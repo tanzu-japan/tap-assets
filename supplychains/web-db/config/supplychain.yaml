@@ -28,6 +28,14 @@ spec:
     - name: gitops_repository_prefix
       default: #@ data.values.gitops.repository_prefix
 
+    - name: helm_url
+      default: #@ data.values.helm.url
+    - name: helm_name
+      default: #@ data.values.helm.name
+    - name: helm_version
+      default: #@ data.values.helm.version
+    - name: helm_values
+      default: #@ data.values.helm.values
   resources:
   - name: source-provider
     templateRef:
@@ -104,18 +112,7 @@ spec:
     params:
     - name: serviceAccount
       value: #@ data.values.service_account
-    - name: helmUrl
-      value: #@ data.values.helm.url
-    - name: helmName
-      value: #@ data.values.helm.name
-    - name: helmVersion
-      value: #@ data.values.helm.version
-    - name: helmValues
-      value: #@ data.values.helm.values
   - name: database-config
     templateRef:
       kind: ClusterTemplate
       name: simple-database-helm-values
-    params:
-    - name: helmValues
-      value: #@ data.values.helm.values

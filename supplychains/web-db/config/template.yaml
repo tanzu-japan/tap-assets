@@ -7,12 +7,6 @@ spec:
   params:
     - name: serviceAccount
       default: default
-    - name: helmUrl
-      default: https://charts.app-catalog.vmware.com/demo
-    - name: helmName
-      default: mysql
-    - name: helmVersion
-      default: 8.8.17
   ytt: |
     #@ load("@ytt:data", "data")
     #@ load("@ytt:yaml", "yaml")
@@ -27,24 +21,21 @@ spec:
 
       fetch:
       - helmChart:
-          name: #@ data.values.params.helmName
-          version: #@ data.values.params.helmVersion
+          name: #@ data.values.params.helm_name
+          version: #@ data.values.params.helm_version
           repository:
-            url: #@ data.values.params.helmUrl
+            url: #@ data.values.params.helm_url
       template:
+      #@ if (data.values.params.helm_values):
       - helmTemplate:
           valuesFrom:
           - configMapRef:
               name: #@ data.values.workload.metadata.name + "-helm-values"
+      #@ else:
+      - helmTemplate: {}
+      #@ end
       - ytt: {}
       - kbld: {}
       deploy:
       - kapp: {}
-    ---
-    apiVersion: v1
-    data:
-      db-helm-values.yaml: #@ yaml.encode(data.values.params.helmValues)
-    kind: ConfigMap
-    metadata:
-      name: #@ data.values.workload.metadata.name + "-helm-values"
     

@@ -4,16 +4,15 @@ kind: ClusterTemplate
 metadata:
   name: simple-database-helm-values
 spec:
-  params:
-    - name: helmValues
-      default: ""
   ytt: |
     #@ load("@ytt:data", "data")
     #@ load("@ytt:yaml", "yaml")
     ---
+    #@ if (data.values.params.helm_values):
     apiVersion: v1
     data:
-      db-helm-values.yaml: #@ yaml.encode(data.values.params.helmValues)
+      db-helm-values.yaml: #@ yaml.encode(data.values.params.helm_values)
     kind: ConfigMap
     metadata:
       name: #@ data.values.workload.metadata.name + "-helm-values"
+    #@ end  
